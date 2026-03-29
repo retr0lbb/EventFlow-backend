@@ -1,0 +1,30 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Maven build output
+target/
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# Docker
+compose.yaml
+docker-compose*.yml
+Dockerfile
+.dockerignore
+
+# Environment
+.env
+
+# Documentation
+README.md
+d
+
+# Maven Wrapper (will use Maven from Docker image)
+.mvn/
+mvnw
+mvnw.cmd
