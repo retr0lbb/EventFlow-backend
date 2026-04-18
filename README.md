@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # EventFlow
 ---
 ## Descrição do Repositório
@@ -12,17 +11,56 @@
 - Sistema Gerenciador de Banco de Dados (SGBD): PostgreSQL
 - Versionamento de Esquema de Banco de Dados: Flyway
 - Conteinerização: Docker e Docker Compose
+- Load Balancer / Proxy Reverso: Nginx
 
-## 2. Diretrizes para Inicialização do Ambiente
+## 2. Arquitetura da Infraestrutura
+
+A aplicação utiliza **Nginx como Load Balancer** na frente de múltiplas instâncias da API Spring Boot, todas orquestradas via Docker Compose.
+
+```
+                          ┌──────────────────┐
+                          │   Cliente HTTP    │
+                          └────────┬─────────┘
+                                   │ :80
+                          ┌────────▼─────────┐
+                          │   Nginx (LB)     │
+                          │   Round Robin     │
+                          └────────┬─────────┘
+                    ┌──────────────┼──────────────┐
+                    │              │              │
+           ┌────────▼───┐  ┌──────▼─────┐  ┌────▼────────┐
+           │  API :8080  │  │  API :8080  │  │  API :8080  │
+           │ (réplica 1) │  │ (réplica 2) │  │ (réplica 3) │
+           └──────┬──────┘  └──────┬──────┘  └──────┬──────┘
+                  │                │                │
+                  └────────────────┼────────────────┘
+                          ┌────────▼─────────┐
+                          │   PostgreSQL     │
+                          │     :5432        │
+                          └──────────────────┘
+```
+
+**Serviços:**
+
+| Serviço    | Porta    | Descrição                                   |
+|------------|----------|---------------------------------------------|
+| Nginx      | 80       | Load balancer (ponto de entrada)            |
+| API        | 8080*    | Aplicação Spring Boot (3 réplicas)          |
+| PostgreSQL | 5432     | Banco de dados relacional                   |
+| pgAdmin    | 5050     | Interface web de administração do PostgreSQL|
+
+> *A porta 8080 é interna à rede Docker. O acesso externo é feito via Nginx na porta 80.
+
+## 3. Diretrizes para Inicialização do Ambiente
 
 ### Pré-requisitos
 
 É imperativo que o ambiente de desenvolvimento local possua as seguintes ferramentas instaladas e com suas respectivas variáveis de ambiente devidamente configuradas:
 
-- Java Development Kit (JDK) 17 ou superior
-- Apache Maven 3.8 ou superior
 - Docker Engine
 - Docker Compose
+
+> **Nota:** Java e Maven não são mais necessários localmente — a compilação é realizada dentro do container Docker (multi-stage build).
 
 ### Procedimentos para Execução em Ambiente Local
 
@@ -30,34 +68,53 @@
 Faça a cópia local do repositório por meio do sistema de controle de versão Git.
 
 ```
-git clone [https://github.com/seu-usuario/nome-do-repositorio.git](https://github.com/seu-usuario/nome-do-repositorio.git)
+git clone https://github.com/seu-usuario/nome-do-repositorio.git
 cd nome-do-repositorio
 ```
 
-**Passo 2: Provisionamento da Infraestrutura de Banco de Dados**
-O projeto dispõe de um arquivo docker-compose.yml previamente configurado para provisionar e isolar a instância do SGBD PostgreSQL. Execute o comando a seguir para inicializar o contêiner em segundo plano.
+**Passo 2: Inicialização completa da infraestrutura**
+O comando a seguir irá compilar a API, criar as imagens Docker e inicializar todos os serviços (PostgreSQL, API com 3 réplicas, Nginx e pgAdmin):
 
-```
-docker-compose up -d
-```
-
-**Passo 3: Compilação e Resolução de Dependências**
-Empregue o utilitário Maven para a limpeza de artefatos provenientes de compilações anteriores e para o download das dependências declaradas.
-
-```
-mvn clean install
+```bash
+docker compose up --build -d
 ```
 
-**Passo 4: Inicialização da Aplicação**
-Durante o processo de inicialização, o framework Spring Boot, atuando em conjunto com a ferramenta Flyway, detectará os scripts SQL alocados no diretório src/main/resources/db/migration e aplicará as alterações estruturais no PostgreSQL de maneira autônoma.
+Após a conclusão com êxito da inicialização, a API estará acessível via Load Balancer em: **http://localhost**
 
+**Passo 3: Verificar o status dos serviços**
+```bash
+docker compose ps
 ```
-mvn spring-boot:run
+
+**Passo 4: Escalar a quantidade de instâncias (opcional)**
+Para alterar o número de réplicas da API em tempo de execução:
+
+```bash
+# Escalar para 5 instâncias
+docker compose up -d --scale api=5
+
+# Reduzir para 2 instâncias
+docker compose up -d --scale api=2
 ```
 
-Após a conclusão com êxito da inicialização, a API estará acessível para requisições na porta padrão: http://localhost:8080.
+**Passo 5: Visualizar os logs**
+```bash
+# Logs de todos os serviços
+docker compose logs -f
 
-## 3. Estrutura Organizacional do Código-Fonte
+# Logs apenas do Nginx
+docker compose logs -f nginx
+
+# Logs apenas das APIs
+docker compose logs -f api
+```
+
+**Passo 6: Parar todos os serviços**
+```bash
+docker compose down
+```
+
+## 4. Estrutura Organizacional do Código-Fonte
 
 A arquitetura de diretórios obedece ao padrão de separação de responsabilidades em camadas, garantindo alta coesão e baixo acoplamento para um monolito bem definido:
 
@@ -77,7 +134,19 @@ src/
  |       `-- application.yml   # Arquivo de propriedades e parâmetros de ambiente do Spring Boot
 ```
 
-## 4. Governança do Banco de Dados (Flyway)
+### Infraestrutura Docker
+
+```
+./
+ |-- Dockerfile                # Multi-stage build (Maven + JRE Alpine)
+ |-- .dockerignore             # Exclusões do contexto de build
+ |-- compose.yaml              # Orquestração de todos os serviços
+ |-- nginx/
+ |   `-- nginx.conf            # Configuração do Load Balancer
+ `-- .env                      # Variáveis de ambiente
+```
+
+## 5. Governança do Banco de Dados (Flyway)
 
 A integridade e a evolução estrutural do esquema de banco de dados são asseguradas pela ferramenta Flyway. Para a manipulação segura da base de dados e mitigação de inconsistências entre ambientes, é estritamente necessário observar as seguintes diretrizes:
 
@@ -87,7 +156,9 @@ A integridade e a evolução estrutural do esquema de banco de dados são assegu
 
 **Padrão de Nomenclatura:** A nomenclatura dos arquivos deve observar estritamente o padrão exigido pelo Flyway: V{numero_da_versao}__{descricao_curta}.sql (exemplo: V2__Add_email_to_users.sql). Ressalta-se a obrigatoriedade do uso de dois sublinhados para separar a versão da descrição.
 
-## 5. Protocolo de Contribuição
+> **Nota sobre múltiplas réplicas:** O Flyway utiliza locks no banco de dados para garantir que apenas uma instância execute as migrações. As demais instâncias aguardam a conclusão antes de iniciar.
+
+## 6. Protocolo de Contribuição
 
 Para propor alterações ao projeto, solicita-se a observância do seguinte fluxo de trabalho:
 
