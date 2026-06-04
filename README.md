@@ -171,3 +171,5 @@ Para propor alterações ao projeto, solicita-se a observância do seguinte flux
 4. Submeta as alterações para a sua ramificação remota: git push origin feature/nomenclatura-da-funcionalidade
 
 5. Solicite a integração por meio de um Pull Request, fornecendo documentação detalhada acerca das modificações e impactos propostos.
+
+...
