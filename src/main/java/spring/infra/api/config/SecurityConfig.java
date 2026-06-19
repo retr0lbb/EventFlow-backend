@@ -44,6 +44,8 @@ public class SecurityConfig {
                 .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers("/api/v1/event/**", "/api/v1/event-session/**").hasAuthority("SCOPE_EVENT_CREATOR")
+                        .requestMatchers("/api/v1/booth/**", "/api/v1/booth-session/**").hasAuthority("SCOPE_STAND_CREATOR")
                         .anyRequest().authenticated())
                 .csrf(csrf -> csrf.disable())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))

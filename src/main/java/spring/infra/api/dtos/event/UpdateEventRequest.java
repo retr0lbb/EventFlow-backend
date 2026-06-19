@@ -3,9 +3,7 @@ package spring.infra.api.dtos.event;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-import java.util.UUID;
-
-public record CreateEventRequest(
+public record UpdateEventRequest(
         @NotBlank(message = "The event name is required")
         @Size(max = 50, min = 3, message = "The event name must be between 3 and 50 characters long")
         String name,
@@ -14,7 +12,7 @@ public record CreateEventRequest(
         @Size(min = 14, max = 14, message = "The CNPJ must be 14 characters long")
         String cnpj,
 
-        @Size(min = 10, max = 255, message = "The event name must be between 10 and 255 characters long.")
+        @Size(min = 10, max = 255, message = "The event description must be between 10 and 255 characters long.")
         String description,
 
         String address,
@@ -23,13 +21,4 @@ public record CreateEventRequest(
         Integer maxParticipants,
         Integer startsAt,
         Integer endsAt
-) {
-    public CreateEventRequest {
-        if (maxParticipants == null) {
-            maxParticipants = 100;
-        }
-        if(description != null && description.strip().isEmpty()){
-            description = null;
-        }
-    }
-}
+) {}

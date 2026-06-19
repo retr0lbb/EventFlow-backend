@@ -1,7 +1,6 @@
 package spring.infra.api.models;
 
 import jakarta.persistence.*;
-import org.w3c.dom.Text;
 import spring.infra.api.enums.EventStatus;
 
 import java.sql.Timestamp;
@@ -16,28 +15,39 @@ public class Event {
 
     private String name;
 
-    private Text description;
+    @Column(unique = true)
+    private String cnpj;
+
+    private String description;
 
     private String address;
 
     private Double latitude;
 
-    private Double longtude;
+    private Double longitude;
 
+    @Column(name = "max_participants")
     private Integer maxParticipants;
 
+    @Column(name = "starts_at")
     private Integer startsAt;
 
+    @Column(name = "ends_at")
     private Integer endsAt;
 
+    @Column(name = "created_by")
     private UUID createdBy;
 
+    @Column(name = "created_at")
     private Timestamp createdAt;
 
+    @Column(name = "deleted_by")
     private UUID deletedBy;
 
+    @Column(name = "deleted_at")
     private Timestamp deletedAt;
 
+    @Enumerated(EnumType.STRING)
     private EventStatus status;
 
     public UUID getId() {
@@ -56,11 +66,19 @@ public class Event {
         this.name = name;
     }
 
-    public Text getDescription() {
+    public String getCnpj() {
+        return cnpj;
+    }
+
+    public void setCnpj(String cnpj) {
+        this.cnpj = cnpj;
+    }
+
+    public String getDescription() {
         return description;
     }
 
-    public void setDescription(Text description) {
+    public void setDescription(String description) {
         this.description = description;
     }
 
@@ -80,12 +98,12 @@ public class Event {
         this.latitude = latitude;
     }
 
-    public Double getLongtude() {
-        return longtude;
+    public Double getLongitude() {
+        return longitude;
     }
 
-    public void setLongtude(Double longtude) {
-        this.longtude = longtude;
+    public void setLongitude(Double longtude) {
+        this.longitude = longtude;
     }
 
     public Integer getMaxParticipants() {
