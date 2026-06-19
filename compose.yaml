@@ -1,5 +1,4 @@
 services:
-
   postgres:
     image: postgres:15-alpine
     container_name: api-postgres-db
@@ -21,24 +20,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: api-pgadmin
-    restart: unless-stopped
-    env_file:
-      - .env
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
-    ports:
-      - "${PGADMIN_PORT:-5050}:80"
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - eventflow-network
-
   api:
     build:
       context: .
@@ -50,15 +31,23 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
       SERVER_PORT: 8080
+      SPRING_DOCKER_COMPOSE_ENABLED: "false"
+      JWT_PRIVATE_KEY: file:/app/certs/app.key
+      JWT_PUBLIC_KEY: file:/app/certs/app.pub
+    volumes:
+      - ./certs:/app/certs:ro
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_started
     networks:
       - eventflow-network
     deploy:
-      replicas: 1
-
+      replicas: 1 # Ajuste o número de réplicas de produção conforme necessário (antigo era 3)
   nginx:
     image: nginx:alpine
     container_name: api-nginx-lb
@@ -72,12 +61,22 @@ services:
         condition: service_started
     networks:
       - eventflow-network
-
+  redis:
+    image: redis:7-alpine
+    container_name: api-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - eventflow-network
 networks:
   eventflow-network:
     driver: bridge
     name: eventflow-network
-
 volumes:
   postgres_data:
     name: eventflow-postgres-data
+  redis_data:
+    name: eventflow-redis-data

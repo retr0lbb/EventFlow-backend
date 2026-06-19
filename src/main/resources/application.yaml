@@ -1,3 +1,26 @@
 spring:
   application:
     name: api
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+
+  docker:
+    compose:
+      file: compose.dev.yaml
+      lifecycle-management: start-only
+
+jwt:
+  private:
+    key: ${JWT_PRIVATE_KEY:file:certs/app.key}
+  public:
+    key: ${JWT_PUBLIC_KEY:file:certs/app.pub}
+  access-token:
+    expiration-seconds: 300      # 5 minutos
+  refresh-token:
+    expiration-seconds: 86400    # 1 dia (24 horas)

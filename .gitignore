@@ -1,11 +1,14 @@
+# Environment
+.env
+certs/app.key
+certs/app.pub
+
+
 HELP.md
 target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-
-
-.env
 
 ### STS ###
 .apt_generated
