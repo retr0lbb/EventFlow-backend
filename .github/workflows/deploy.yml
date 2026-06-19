@@ -1,0 +1,52 @@
+name: CD - Deploy to Production VPS
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  test-and-deploy:
+    runs-on: ubuntu-latest
+
+    services:
+      # Disponibiliza um container do Redis para a fase de testes
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'oracle'
+          cache: maven
+
+      - name: Generate Temporary RSA Keys for Security Context (Testing)
+        run: |
+          mkdir -p certs
+          openssl genpkey -algorithm RSA -out certs/app.key -pkeyopt rsa_keygen_bits:2048
+          openssl rsa -pubout -in certs/app.key -out certs/app.pub
+
+      - name: Run Unit Tests with Maven
+        run: mvn clean test
+
+      - name: Deploy to VPS - SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          script: |
+            cd ~/apps/EventFlow-backend            
+            git pull origin main
+            docker compose -f compose.yaml up -d --build --remove-orphans
