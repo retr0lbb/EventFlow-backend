@@ -3,7 +3,7 @@ package spring.infra.api.services;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import spring.infra.api.dtos.event.CreateEventRequest;
-import spring.infra.api.dtos.event.CreateEventResponse;
+//import spring.infra.api.dtos.event.CreateEventResponse;
 import spring.infra.api.dtos.event.EventResponse;
 import spring.infra.api.dtos.event.UpdateEventRequest;
 import spring.infra.api.enums.EventStatus;
@@ -130,12 +130,6 @@ public class EventService {
                 event.getMaxParticipants(),
                 event.getStartsAt(),
                 event.getEndsAt(),
-                event.getStatus(),
-                event.getCreatedAt().getTime()
-        );
-    }
-}
-vent.getEndsAt(),
                 event.getStatus(),
                 event.getCreatedAt().getTime()
         );

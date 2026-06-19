@@ -7,7 +7,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import spring.infra.api.dtos.auth.SignupResponse;
 import spring.infra.api.dtos.event.CreateEventRequest;
-import spring.infra.api.dtos.event.CreateEventResponse;
 import spring.infra.api.dtos.event.EventResponse;
 import spring.infra.api.dtos.event.UpdateEventRequest;
 import spring.infra.api.services.AuthService;

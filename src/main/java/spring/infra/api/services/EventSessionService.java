@@ -23,10 +23,12 @@ public class EventSessionService {
 
     private final EventSessionRepository eventSessionRepository;
     private final EventRepository eventRepository;
+    private final EmailService emailService;
 
-    public EventSessionService(EventSessionRepository eventSessionRepository, EventRepository eventRepository) {
+    public EventSessionService(EventSessionRepository eventSessionRepository, EventRepository eventRepository, EmailService emailService) {
         this.eventSessionRepository = eventSessionRepository;
         this.eventRepository = eventRepository;
+        this.emailService = emailService;
     }
 
     @Transactional

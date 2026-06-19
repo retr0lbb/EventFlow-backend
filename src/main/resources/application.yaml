@@ -15,6 +15,21 @@ spring:
       file: compose.dev.yaml
       lifecycle-management: start-only
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
 jwt:
   private:
     key: ${JWT_PRIVATE_KEY:file:certs/app.key}
