@@ -22,6 +22,7 @@ spring:
     password: ${MAIL_PASSWORD}
     properties:
       mail:
+        debug: true
         smtp:
           auth: true
           starttls:
@@ -30,12 +31,16 @@ spring:
           timeout: 5000
           writetimeout: 5000
 
+logging:
+  level:
+    org.springframework.mail: DEBUG
+
 jwt:
   private:
     key: ${JWT_PRIVATE_KEY:file:certs/app.key}
   public:
     key: ${JWT_PUBLIC_KEY:file:certs/app.pub}
   access-token:
-    expiration-seconds: 300      # 5 minutos
+    expiration-seconds: 3000      # 5 minutos
   refresh-token:
     expiration-seconds: 86400    # 1 dia (24 horas)

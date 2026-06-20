@@ -22,6 +22,8 @@ import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 
+
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -39,11 +41,12 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        // TODO: Enable and configure the CSRF before up to prod
         http
+                .cors(Customizer.withDefaults())
                 .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers("/api/v1/event/all").permitAll()  // <- nova regra, mais específica, vem antes
                         .requestMatchers("/api/v1/event/**", "/api/v1/event-session/**").hasAuthority("SCOPE_EVENT_CREATOR")
                         .requestMatchers("/api/v1/booth/**", "/api/v1/booth-session/**").hasAuthority("SCOPE_STAND_CREATOR")
                         .anyRequest().authenticated())

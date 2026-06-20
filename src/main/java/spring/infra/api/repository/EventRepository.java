@@ -10,7 +10,6 @@ import java.util.UUID;
 
 public interface EventRepository extends JpaRepository<Event, UUID> {
     Optional<Event> findByCreatedBy(UUID userId);
-    Optional<Event> findByCnpj(String cnpj);
     List<Event> findAllByDeletedAtIsNull();
     Optional<Event> findByIdAndDeletedAtIsNull(UUID id);
 }

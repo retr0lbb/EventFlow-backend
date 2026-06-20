@@ -31,26 +31,16 @@ public class EventService {
 
     @Transactional
     public EventResponse createEvent(CreateEventRequest request, UUID userId) {
-        if (request.endsAt() <= request.startsAt()) {
-            throw new IllegalArgumentException("The event must end after it starts.");
-        }
-
-        if (eventRepository.findByCnpj(request.cnpj()).isPresent()) {
-            throw new CnpjAlreadyExistsException("An event with this CNPJ already exists.");
-        }
-
         Event evt = new Event();
 
         evt.setName(request.name());
-        evt.setCnpj(request.cnpj());
         evt.setDescription(request.description());
         evt.setAddress(request.address());
-        evt.setLatitude(request.latitude());
-        evt.setLongitude(request.longitude());
         evt.setMaxParticipants(request.maxParticipants());
-        evt.setStartsAt(request.startsAt());
-        evt.setEndsAt(request.endsAt());
-        
+
+        evt.setStartsAt(Timestamp.from(Instant.parse(request.startsAt())));
+        evt.setEndsAt(Timestamp.from(Instant.parse(request.endsAt())));
+
         evt.setCreatedBy(userId);
         evt.setCreatedAt(Timestamp.from(Instant.now()));
         evt.setStatus(EventStatus.DRAFT);
@@ -81,23 +71,12 @@ public class EventService {
             throw new UnauthorizedAccessException("You don't have permission to update this event");
         }
 
-        if (request.endsAt() <= request.startsAt()) {
-            throw new IllegalArgumentException("The event must end after it starts.");
-        }
-
-        if (!event.getCnpj().equals(request.cnpj()) && eventRepository.findByCnpj(request.cnpj()).isPresent()) {
-            throw new CnpjAlreadyExistsException("An event with this CNPJ already exists.");
-        }
-
         event.setName(request.name());
-        event.setCnpj(request.cnpj());
         event.setDescription(request.description());
         event.setAddress(request.address());
-        event.setLatitude(request.latitude());
-        event.setLongitude(request.longitude());
         event.setMaxParticipants(request.maxParticipants());
-        event.setStartsAt(request.startsAt());
-        event.setEndsAt(request.endsAt());
+        event.setStartsAt(Timestamp.valueOf(request.startsAt()));
+        event.setEndsAt(Timestamp.valueOf(request.endsAt()));
 
         Event updatedEvent = eventRepository.save(event);
         return convertToResponse(updatedEvent);
@@ -122,16 +101,13 @@ public class EventService {
         return new EventResponse(
                 event.getId(),
                 event.getName(),
-                event.getCnpj(),
                 event.getDescription(),
                 event.getAddress(),
-                event.getLatitude(),
-                event.getLongitude(),
                 event.getMaxParticipants(),
-                event.getStartsAt(),
-                event.getEndsAt(),
+                String.valueOf(event.getStartsAt()),
+                String.valueOf(event.getEndsAt()),
                 event.getStatus(),
-                event.getCreatedAt().getTime()
+                String.valueOf(event.getCreatedAt().getTime())
         );
     }
 }

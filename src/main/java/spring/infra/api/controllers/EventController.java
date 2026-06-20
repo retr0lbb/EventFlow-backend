@@ -28,6 +28,7 @@ public class EventController {
         this.eventService = eventService;
     }
 
+
     @PostMapping("/create")
     public ResponseEntity<EventResponse> createEvent(
             @Valid
@@ -41,7 +42,7 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<EventResponse>> getAllEvents() {
         List<EventResponse> events = this.eventService.getAllEvents();
         return ResponseEntity.ok(events);

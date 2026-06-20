@@ -6,14 +6,11 @@ import java.util.UUID;
 public record EventResponse(
         UUID id,
         String name,
-        String cnpj,
         String description,
         String address,
-        Double latitude,
-        Double longitude,
         Integer maxParticipants,
-        Integer startsAt,
-        Integer endsAt,
+        String startsAt,
+        String endsAt,
         EventStatus status,
-        Long createdAt
+        String createdAt
 ) {}

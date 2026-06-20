@@ -15,25 +15,21 @@ public class Event {
 
     private String name;
 
-    @Column(unique = true)
-    private String cnpj;
-
     private String description;
 
     private String address;
-
-    private Double latitude;
-
-    private Double longitude;
 
     @Column(name = "max_participants")
     private Integer maxParticipants;
 
     @Column(name = "starts_at")
-    private Integer startsAt;
+    private Timestamp startsAt;
 
     @Column(name = "ends_at")
-    private Integer endsAt;
+    private Timestamp endsAt;
+
+    @Column(name = "banner_url")
+    private String bannerUrl;
 
     @Column(name = "created_by")
     private UUID createdBy;
@@ -66,14 +62,6 @@ public class Event {
         this.name = name;
     }
 
-    public String getCnpj() {
-        return cnpj;
-    }
-
-    public void setCnpj(String cnpj) {
-        this.cnpj = cnpj;
-    }
-
     public String getDescription() {
         return description;
     }
@@ -90,22 +78,6 @@ public class Event {
         this.address = address;
     }
 
-    public Double getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(Double latitude) {
-        this.latitude = latitude;
-    }
-
-    public Double getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(Double longtude) {
-        this.longitude = longtude;
-    }
-
     public Integer getMaxParticipants() {
         return maxParticipants;
     }
@@ -114,20 +86,28 @@ public class Event {
         this.maxParticipants = maxParticipants;
     }
 
-    public Integer getStartsAt() {
+    public Timestamp getStartsAt() {
         return startsAt;
     }
 
-    public void setStartsAt(Integer startsAt) {
+    public void setStartsAt(Timestamp startsAt) {
         this.startsAt = startsAt;
     }
 
-    public Integer getEndsAt() {
+    public Timestamp getEndsAt() {
         return endsAt;
     }
 
-    public void setEndsAt(Integer endsAt) {
+    public void setEndsAt(Timestamp endsAt) {
         this.endsAt = endsAt;
+    }
+
+    public String getBannerUrl() {
+        return bannerUrl;
+    }
+
+    public void setBannerUrl(String bannerUrl) {
+        this.bannerUrl = bannerUrl;
     }
 
     public UUID getCreatedBy() {
