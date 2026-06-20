@@ -9,5 +9,6 @@ public record CheckinResponse(
         UUID eventId,
         UUID userId,
         CheckinStatus status,
-        Long createdAt
+        Long createdAt,
+        String message
 ) {}
