@@ -43,6 +43,7 @@ public class EventService {
 
         evt.setCreatedBy(userId);
         evt.setCreatedAt(Timestamp.from(Instant.now()));
+        evt.setBannerUrl(request.bannerUrl());
         evt.setStatus(EventStatus.DRAFT);
 
         Event savedEvent = eventRepository.save(evt);
@@ -107,7 +108,8 @@ public class EventService {
                 String.valueOf(event.getStartsAt()),
                 String.valueOf(event.getEndsAt()),
                 event.getStatus(),
-                String.valueOf(event.getCreatedAt().getTime())
+                String.valueOf(event.getCreatedAt().getTime()),
+                event.getBannerUrl()
         );
     }
 }

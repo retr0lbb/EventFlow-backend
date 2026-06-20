@@ -5,6 +5,8 @@ import org.springframework.transaction.annotation.Transactional;
 import spring.infra.api.dtos.checkin.CheckinResponse;
 import spring.infra.api.dtos.checkin.CreateCheckinRequest;
 import spring.infra.api.enums.CheckinStatus;
+import spring.infra.api.exceptions.EventAtFullCapacityException;
+import spring.infra.api.exceptions.UnauthorizedAccessException;
 import spring.infra.api.models.Event;
 import spring.infra.api.models.User;
 import spring.infra.api.models.UserEventCheckin;
@@ -12,6 +14,7 @@ import spring.infra.api.repository.EventRepository;
 import spring.infra.api.repository.UserEventCheckinRepository;
 import spring.infra.api.repository.UserRepository;
 
+import java.sql.Timestamp;
 import java.util.UUID;
 
 @Service
@@ -44,7 +47,34 @@ public class CheckinService {
 
         UserEventCheckin saved = checkinRepository.save(checkin);
 
-        emailService.sendEventPresenceConfirmation(user.getEmail(), "randomUrl", event.getName());
+        emailService.sendEventPresenceConfirmation(user.getEmail(), "http://localhost:5173/confirmation/" + saved.getId(), event.getName());
+
+        return new CheckinResponse(
+                saved.getId(),
+                saved.getEvent().getId(),
+                saved.getUser().getId(),
+                saved.getStatus(),
+                saved.getCreatedAt().getTime()
+        );
+    }
+
+    @Transactional
+    public CheckinResponse validateCheckin(UUID checkinId, UUID loggedUserId) {
+        UserEventCheckin checkin = checkinRepository.findById(checkinId)
+                .orElseThrow(() -> new IllegalArgumentException("Checkin not found"));
+
+        Event event = checkin.getEvent();
+
+        long doneCount = checkinRepository.findByEventIdAndStatus(event.getId(), CheckinStatus.DONE).size();
+
+        if (event.getMaxParticipants() != null && doneCount >= event.getMaxParticipants()) {
+            throw new EventAtFullCapacityException("Event is at full capacity. Sorry, no more check-ins can be validated.");
+        }
+
+        checkin.setStatus(CheckinStatus.DONE);
+        checkin.setCheckedInAt(new Timestamp(System.currentTimeMillis()));
+
+        UserEventCheckin saved = checkinRepository.save(checkin);
 
         return new CheckinResponse(
                 saved.getId(),

@@ -12,5 +12,6 @@ public record EventResponse(
         String startsAt,
         String endsAt,
         EventStatus status,
-        String createdAt
+        String createdAt,
+        String bannerUrl
 ) {}

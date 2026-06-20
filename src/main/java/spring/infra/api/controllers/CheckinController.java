@@ -31,4 +31,14 @@ public class CheckinController {
         CheckinResponse response = checkinService.createCheckin(request, userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<CheckinResponse> validateCheckin(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+        CheckinResponse response = checkinService.validateCheckin(id, userId);
+        return ResponseEntity.ok(response);
+    }
 }

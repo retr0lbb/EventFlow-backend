@@ -18,7 +18,9 @@ public record CreateEventRequest(
         String startsAt,
 
         @NotBlank(message = "The end date is required")
-        String endsAt
+        String endsAt,
+
+        String bannerUrl
 ) {
     public CreateEventRequest {
         if (maxParticipants == null) {
